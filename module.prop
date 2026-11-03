@@ -1,8 +1,7 @@
 id=riskr
-name=Risk - RAM Cache Apps Cleaner
-version=2.3-011024
-set=2.3-011024
-versionCode=437011024 
-author=Zyarexx @Telegram
-description=Clean RAM Cache And Stop Background Apps, Google Apps, Third Party Apps Before Playing Games, To Get More Free RAM | Termux Menu : su -c risk
-updateJson=https://raw.githubusercontent.com/rakarmp/Risk/main/update.json
+name=Risk - RAM Cache & App Optimizer (KSU WebUI)
+version=2.4-ksuwebui
+versionCode=43702400
+author=Zyarexx & sofikuw
+description=Clean RAM Cache, Stop Background Apps, LMKD tuning, and App Management with KernelSU WebUI support for Android 12-16+.
+updateJson=https://raw.githubusercontent.com/sofikuw/Risk/main/update.json

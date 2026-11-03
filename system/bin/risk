@@ -47,15 +47,9 @@ LMKD_DOWNGRADE_PRESSURE=100
 LMKD_KILL_HEAVIEST_TASK=true
 
 check_support() {
-cp /data/adb/modules/riskr/system/bin/rish /data/data/com.termux/files/usr/bin/
-cp /data/adb/modules/riskr/system/bin/rish_shizuku.dex /data/data/com.termux/files/usr/bin/
-if ! pm list packages > /dev/null 2>&1; then
-        echo ""
-        echo -e "${RED}ROM Not Support, Please Type${NC} ${YELLOW}'rish'${NC} ${RED}First In Your Termux${NC}"
-        echo -e "${RED} If You Not Have Shizuku, Please Download In Playstore${NC}"
-        echo -e "${RED}And Start Shizuku For Root${NC}"
-        echo ""
-        exit 0
+    if [ -d "/data/data/com.termux/files/usr/bin" ]; then
+        cp -f /data/adb/modules/riskr/system/bin/rish /data/data/com.termux/files/usr/bin/ > /dev/null 2>&1
+        cp -f /data/adb/modules/riskr/system/bin/rish_shizuku.dex /data/data/com.termux/files/usr/bin/ > /dev/null 2>&1
     fi
 }
 
@@ -826,5 +820,39 @@ echo " "
         esac
     done
 }
-clear
-main_menu
+case "$1" in
+    safe)
+        stop_apps "third_party"
+        ;;
+    aggressive)
+        stop_apps "google"
+        ;;
+    custom)
+        stop_apps "$2"
+        ;;
+    trim)
+        trim
+        ;;
+    clean-cache)
+        clean_third_party_apps
+        ;;
+    compile)
+        monolith_compile
+        ;;
+    downscale)
+        device_config put game_overlay "$2" mode=2,downscaleFactor="$3":mode=3,downscaleFactor="$3"
+        echo "Downscale applied to $2 with factor $3"
+        ;;
+    freeze)
+        pm disable-user --user 0 "$2"
+        echo "Frozen: $2"
+        ;;
+    unfreeze)
+        pm enable "$2"
+        echo "Unfrozen: $2"
+        ;;
+    *)
+        clear
+        main_menu
+        ;;
+esac

@@ -31,51 +31,46 @@ REPLACE_EXAMPLE="
 REPLACE="
 "
 RISK_DIR="/sdcard/Android"
-TERMUX_DIR="/data/data/com.termux/files/usr"
 ui_print " "
 ui_print "  ╔═══╗───╔╗"
 ui_print "  ║╔═╗║───║║"
 ui_print "  ║╚═╝╠╦══╣║╔╗"
 ui_print "  ║╔╗╔╬╣══╣╚╝╝"
 ui_print "  ║║║╚╣╠══║╔╗╗"
-ui_print "  ╚╝╚═╩╩══╩╝╚╝"
+ui_print "  ╚╝╚═╩╩══╩╝╚╝ KSU WebUI Edition"
 ui_print " "
 if [ "$KSU" == true ]; then
 ui_print "  KernelSu Ver: $KSU_VER"
 ui_print "  KernelSu Ver Code: $KSU_VER_CODE"
 ui_print "  KernelSu Kernel Ver Code: $KSU_KERNEL_VER_CODE"
 else
-ui_print "  Magisk Ver: $MAGISK_VER"
-ui_print "  Magisk Ver Code: $MAGISK_VER_CODE"
+ui_print "  Magisk/Root Ver: $MAGISK_VER"
 fi
 ui_print " "
 sleep 1
-ui_print "  Risk is a magisk module open source"
-ui_print "  project, you can view the entire code"
-ui_print "  to make sure there is no malware or"
-ui_print "  viruses that harm your device."
-sleep 1
+ui_print "  Risk is an open source module optimized"
+ui_print "  for KernelSU WebUI on Android 12-16+."
 ui_print " "
-ui_print "  You can add applications that you don't"
-ui_print "  want to stop in the path :"
+ui_print "  Excluded apps path:"
 ui_print "  - /sdcard/Android/Risk/excluded_apps.txt"
 ui_print " "
-ui_print "  If Risk is not supported, use Shizuku Download"
-ui_print "  on Playstore"
-ui_print " "
 sleep 1
-ui_print "- Setup Risk Permission"
+ui_print "- Setup Risk Permission & WebUI"
 unzip -o "$ZIPFILE" 'excluded_apps.txt' -d $MODPATH >&2
 unzip -o "$ZIPFILE" 'service.sh' -d $MODPATH >&2
 unzip -o "$ZIPFILE" 'system.prop' -d $MODPATH >&2
 unzip -o "$ZIPFILE" 'system/*' -d $MODPATH >&2
-mkdir $RISK_DIR/Risk
-cp $MODPATH/excluded_apps.txt $RISK_DIR/Risk
+unzip -o "$ZIPFILE" 'action.sh' -d $MODPATH >&2
+unzip -o "$ZIPFILE" 'webroot/*' -d $MODPATH >&2
+mkdir -p $RISK_DIR/Risk
+cp -f $MODPATH/excluded_apps.txt $RISK_DIR/Risk/
 chmod +x "$MODPATH/system/bin/risk"
+chmod +x "$MODPATH/action.sh"
 touch $RISK_DIR/Risk/risk.log
 
 
 set_permissions() {
   set_perm_recursive $MODPATH 0 0 0755 0644
   set_perm_recursive $MODPATH/system/bin 0 0 0777 0755
+  set_perm 0 0 0755 $MODPATH/action.sh
 }
