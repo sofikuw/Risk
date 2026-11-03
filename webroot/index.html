@@ -4,250 +4,220 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Risk - KernelSU WebUI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        dark: {
-                            bg: '#0f172a',
-                            card: '#1e293b',
-                            border: '#334155'
-                        }
-                    }
-                }
-            }
+    <style>
+        :root {
+            --bg: #090d16;
+            --card: #131d31;
+            --border: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent: #10b981;
+            --danger: #ef4444;
         }
-    </script>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding-bottom: 40px; min-height: 100vh; }
+        header { background: var(--card); border-bottom: 1px solid var(--border); padding: 16px; position: sticky; top: 0; z-index: 50; display: flex; justify-content: space-between; align-items: center; }
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-icon { background: var(--primary); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: white; }
+        .container { max-width: 600px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+        .card-title { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .stat-box { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; }
+        .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+        .stat-value { font-size: 14px; font-weight: bold; color: var(--text); margin-top: 4px; font-family: monospace; }
+        .btn-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        button { background: #1e293b; color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; text-align: left; }
+        button:active { transform: scale(0.98); }
+        button.primary { background: var(--primary); border-color: var(--primary); color: white; }
+        button.primary:hover { background: var(--primary-hover); }
+        button:hover { border-color: #475569; background: #26334d; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+        label { font-size: 12px; color: var(--text-muted); }
+        input, select { background: #090d16; border: 1px solid var(--border); border-radius: 8px; padding: 10px; color: var(--text); font-size: 14px; width: 100%; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); }
+        .terminal { background: #05070a; border: 1px solid var(--border); border-radius: 10px; padding: 12px; font-family: monospace; font-size: 11px; color: #34d399; height: 180px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+        .terminal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .badge { background: #1e293b; color: #818cf8; border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-family: monospace; }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen pb-12">
-    <!-- Header -->
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 backdrop-blur bg-opacity-90">
-        <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-500/30">
-                    <i class="fa-solid fa-shield-halved text-white text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-tight">Risk Optimizer</h1>
-                    <p class="text-xs text-slate-400">KernelSU WebUI Edition</p>
-                </div>
-            </div>
-            <div id="device-badge" class="text-xs bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full font-mono text-indigo-400">
-                Loading...
+<body>
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon">R</div>
+            <div>
+                <h2 style="font-size: 15px; font-weight: 700;">Risk Optimizer</h2>
+                <span style="font-size: 11px; color: var(--text-muted);">KernelSU WebUI</span>
             </div>
         </div>
+        <div id="device-badge" class="badge">Initializing...</div>
     </header>
 
-    <!-- Main Container -->
-    <main class="max-w-4xl mx-auto px-4 mt-6 space-y-6">
-        
-        <!-- Quick Stats Card -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
-                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">RAM Total</div>
-                <div id="stat-ram" class="text-lg font-bold text-slate-200 mt-1 font-mono">--</div>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
-                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">CPU Cores</div>
-                <div id="stat-cpu" class="text-lg font-bold text-slate-200 mt-1 font-mono">--</div>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
-                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Android</div>
-                <div id="stat-android" class="text-lg font-bold text-slate-200 mt-1 font-mono">--</div>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl shadow-sm">
-                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Version</div>
-                <div class="text-lg font-bold text-indigo-400 mt-1 font-mono">2.4-ksu</div>
-            </div>
-        </div>
-
-        <!-- Quick Actions / Modes -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
-            <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4 flex items-center">
-                <i class="fa-solid fa-bolt text-amber-400 mr-2"></i> RAM & Background Cleaners
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <button onclick="runCommand('risk safe', 'Safe Mode (Stop 3rd Party Apps)')" class="flex items-center justify-between bg-slate-800 hover:bg-slate-750 border border-slate-700/60 hover:border-indigo-500/50 p-4 rounded-xl transition group text-left">
-                    <div>
-                        <div class="font-semibold text-sm text-slate-200 group-hover:text-indigo-300">Safe Clean</div>
-                        <div class="text-xs text-slate-400 mt-0.5">Stop 3rd-party apps & RAM cache</div>
-                    </div>
-                    <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-indigo-400 transition transform group-hover:translate-x-1"></i>
-                </button>
-
-                <button onclick="runCommand('risk aggressive', 'Aggressive Mode (Stop 3rd Party & Google)')" class="flex items-center justify-between bg-slate-800 hover:bg-slate-750 border border-slate-700/60 hover:border-amber-500/50 p-4 rounded-xl transition group text-left">
-                    <div>
-                        <div class="font-semibold text-sm text-slate-200 group-hover:text-amber-300">Aggressive Clean</div>
-                        <div class="text-xs text-slate-400 mt-0.5">Stop 3rd-party & Google apps</div>
-                    </div>
-                    <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-amber-400 transition transform group-hover:translate-x-1"></i>
-                </button>
-
-                <button onclick="runCommand('risk trim', 'Clear RAM Cache & Drop Caches')" class="flex items-center justify-between bg-slate-800 hover:bg-slate-750 border border-slate-700/60 hover:border-emerald-500/50 p-4 rounded-xl transition group text-left">
-                    <div>
-                        <div class="font-semibold text-sm text-slate-200 group-hover:text-emerald-300">Clear RAM Cache</div>
-                        <div class="text-xs text-slate-400 mt-0.5">pm trim-caches & drop_caches</div>
-                    </div>
-                    <i class="fa-solid fa-arrow-right text-slate-500 group-hover:text-emerald-400 transition transform group-hover:translate-x-1"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Advanced Performance Tools -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
-            <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4 flex items-center">
-                <i class="fa-solid fa-microchip text-indigo-400 mr-2"></i> Performance & Compilation
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <button onclick="runCommand('risk compile', 'Monolith Compile (speed-profile)')" class="flex items-center justify-between bg-slate-800 hover:bg-slate-750 border border-slate-700/60 hover:border-indigo-500/50 p-4 rounded-xl transition group text-left">
-                    <div>
-                        <div class="font-semibold text-sm text-slate-200 group-hover:text-indigo-300">Monolith Compile</div>
-                        <div class="text-xs text-slate-400 mt-0.5">Compile apps with speed-profile & reconcile</div>
-                    </div>
-                    <i class="fa-solid fa-gears text-slate-500 group-hover:text-indigo-400"></i>
-                </button>
-
-                <button onclick="runCommand('risk clean-cache', 'Clean Third Party Apps Cache')" class="flex items-center justify-between bg-slate-800 hover:bg-slate-750 border border-slate-700/60 hover:border-indigo-500/50 p-4 rounded-xl transition group text-left">
-                    <div>
-                        <div class="font-semibold text-sm text-slate-200 group-hover:text-indigo-300">Clean App Caches</div>
-                        <div class="text-xs text-slate-400 mt-0.5">Iterate and trim 3rd party app caches</div>
-                    </div>
-                    <i class="fa-solid fa-broom text-slate-500 group-hover:text-indigo-400"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Game Overlay Downscale Tool -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
-            <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4 flex items-center">
-                <i class="fa-solid fa-gamepad text-purple-400 mr-2"></i> Game Overlay Downscale (Android 12+)
-            </h2>
-            <div class="space-y-3">
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Package Name (e.g., com.tencent.ig)</label>
-                    <input type="text" id="downscale-pkg" placeholder="com.example.game" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 font-mono">
+    <div class="container">
+        <!-- Stats -->
+        <div class="card">
+            <div class="card-title">📱 Device Status</div>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">RAM</div>
+                    <div id="stat-ram" class="stat-value">--</div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <div class="flex-1">
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Downscale Factor (0.5 to 1.0)</label>
-                        <select id="downscale-factor" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
-                            <option value="0.5">0.5 (Maximum Performance / 50%)</option>
-                            <option value="0.6">0.6 (Balanced)</option>
-                            <option value="0.75">0.75 (High Quality)</option>
-                            <option value="1.0">1.0 (Reset / Native)</option>
-                        </select>
-                    </div>
-                    <div class="pt-5">
-                        <button onclick="applyDownscale()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-5 py-2.5 rounded-xl transition text-sm shadow-lg shadow-indigo-600/20">
-                            Apply Downscale
-                        </button>
-                    </div>
+                <div class="stat-box">
+                    <div class="stat-label">CPU Cores</div>
+                    <div id="stat-cpu" class="stat-value">--</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Android</div>
+                    <div id="stat-android" class="stat-value">--</div>
                 </div>
             </div>
         </div>
 
-        <!-- Live Output Terminal Console -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
-            <div class="flex items-center justify-between mb-3">
-                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center">
-                    <i class="fa-solid fa-terminal text-emerald-400 mr-2"></i> Execution Log / Output
-                </h2>
-                <button onclick="clearOutput()" class="text-xs text-slate-400 hover:text-slate-200 bg-slate-800 px-3 py-1 rounded-lg border border-slate-700 transition">
-                    Clear Log
+        <!-- Cleaners -->
+        <div class="card">
+            <div class="card-title">⚡ Quick Boost & Cleaners</div>
+            <div class="btn-grid">
+                <button onclick="runRisk('safe')">
+                    <span>🛡️ Safe Clean <small style="display:block; color:var(--text-muted); font-size:11px;">Stop 3rd party apps & clear cache</small></span>
+                    <span>→</span>
                 </button>
-            </div>
-            <div id="output-box" class="bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-400 h-64 overflow-y-auto whitespace-pre-wrap select-text">
-// Risk KernelSU WebUI Ready. Click any action above to execute.
+                <button onclick="runRisk('aggressive')">
+                    <span>🔥 Aggressive Clean <small style="display:block; color:var(--text-muted); font-size:11px;">Stop 3rd party & Google apps</small></span>
+                    <span>→</span>
+                </button>
+                <button onclick="runRisk('trim')">
+                    <span>🧹 Clear RAM Cache <small style="display:block; color:var(--text-muted); font-size:11px;">pm trim-caches & drop_caches</small></span>
+                    <span>→</span>
+                </button>
             </div>
         </div>
 
-    </main>
+        <!-- Performance -->
+        <div class="card">
+            <div class="card-title">⚙️ System Optimization</div>
+            <div class="btn-grid">
+                <button onclick="runRisk('compile')">
+                    <span>🚀 Monolith Compile <small style="display:block; color:var(--text-muted); font-size:11px;">Optimize packages (speed-profile)</small></span>
+                    <span>→</span>
+                </button>
+                <button onclick="runRisk('clean-cache')">
+                    <span>🗂️ Clean App Caches <small style="display:block; color:var(--text-muted); font-size:11px;">Trim caches for all 3rd-party apps</small></span>
+                    <span>→</span>
+                </button>
+            </div>
+        </div>
 
-    <!-- Script Logic -->
+        <!-- Game Downscale -->
+        <div class="card">
+            <div class="card-title">🎮 Game Overlay Downscale</div>
+            <div class="input-group">
+                <label>Package Name</label>
+                <input type="text" id="pkg-input" placeholder="e.g. com.tencent.ig">
+            </div>
+            <div class="input-group">
+                <label>Resolution Scale</label>
+                <select id="scale-select">
+                    <option value="0.5">0.5 (50% Performance)</option>
+                    <option value="0.6">0.6 (Balanced)</option>
+                    <option value="0.75">0.75 (High Quality)</option>
+                    <option value="1.0">1.0 (Reset / Native)</option>
+                </select>
+            </div>
+            <button class="primary" onclick="applyDownscale()" style="width:100%; justify-content:center;">Apply Downscale</button>
+        </div>
+
+        <!-- Terminal Console -->
+        <div class="card">
+            <div class="terminal-header">
+                <span class="card-title" style="margin-bottom:0;">💻 Output Console</span>
+                <button onclick="clearTerminal()" style="padding:4px 8px; font-size:11px; background:#1e293b;">Clear</button>
+            </div>
+            <div id="terminal-box" class="terminal">// Risk WebUI ready. Click any action above.</div>
+        </div>
+    </div>
+
     <script>
-        // Initialize device info on load
-        window.addEventListener('DOMContentLoaded', () => {
-            loadDeviceInfo();
-        });
-
-        function logToConsole(text, isError = false) {
-            const box = document.getElementById('output-box');
-            const timestamp = new Date().toLocaleTimeString();
-            const prefix = isError ? '[ERROR] ' : '[INFO] ';
-            box.textContent += `\n[${timestamp}] ${prefix}${text}`;
+        function log(msg) {
+            const box = document.getElementById('terminal-box');
+            box.textContent += '\n' + msg;
             box.scrollTop = box.scrollHeight;
         }
 
-        function clearOutput() {
-            document.getElementById('output-box.textContent') = '// Console cleared.';
-            document.getElementById('output-box').textContent = '// Console cleared.';
+        function clearTerminal() {
+            document.getElementById('terminal-box').textContent = '// Console cleared.';
+        }
+
+        function executeShell(cmd, callback) {
+            if (window.ksu && typeof window.ksu.exec === 'function') {
+                try {
+                    window.ksu.exec(cmd, {
+                        onStdout: (output) => { if (output) callback(output); },
+                        onStderr: (error) => { if (error) callback('[ERR] ' + error); },
+                        onExit: (code) => { log(`[Exit code: ${code}]`); }
+                    });
+                } catch (e) {
+                    try {
+                        window.ksu.exec(cmd, (res) => {
+                            if (res && res.stdout) callback(res.stdout);
+                            else callback(JSON.stringify(res));
+                        });
+                    } catch (err) {
+                        callback('[Exception] ' + err.message);
+                    }
+                }
+            } else {
+                // Simulation mode for browser testing
+                setTimeout(() => {
+                    callback(`[Simulation Result for: ${cmd}] Success`);
+                }, 300);
+            }
         }
 
         function loadDeviceInfo() {
-            if (window.ksu && typeof window.ksu.exec === 'function') {
-                window.ksu.exec('sh /data/adb/modules/riskr/system/bin/risk --version-info || getprop ro.build.version.release', {
-                    onStdout: (res) => {
-                        document.getElementById('stat-android').innerText = res.trim() || 'Android';
-                    },
-                    onStderr: () => {}
-                });
-                window.ksu.exec("grep 'MemTotal' /proc/meminfo | awk '{print int($2/1024) \" MB\"}'", {
-                    onStdout: (res) => {
-                        document.getElementById('stat-ram').innerText = res.trim() || '--';
-                    }
-                });
-                window.ksu.exec("grep 'processor' /proc/cpuinfo | wc -l", {
-                    onStdout: (res) => {
-                        document.getElementById('stat-cpu').innerText = res.trim() || '--';
-                        document.getElementById('device-badge').innerText = 'KSU Active';
-                    }
-                });
-            } else {
-                // Fallback for browser testing / simulation
-                document.getElementById('stat-ram').innerText = '8192 MB';
-                document.getElementById('stat-cpu').innerText = '8 Cores';
-                document.getElementById('stat-android').innerText = '14 / 16';
-                document.getElementById('device-badge').innerText = 'Browser Simulation';
-                logToConsole('Running in browser simulation mode (KernelSU WebUI bridge not detected).');
-            }
+            log('Detecting device specs...');
+            
+            // Android Version
+            executeShell("getprop ro.build.version.release", (out) => {
+                document.getElementById('stat-android').textContent = out.trim() || '14+';
+            });
+
+            // RAM Total
+            executeShell("grep 'MemTotal' /proc/meminfo | awk '{print int($2/1024) \" MB\"}'", (out) => {
+                document.getElementById('stat-ram').textContent = out.trim() || '8 GB';
+            });
+
+            // CPU Cores
+            executeShell("grep 'processor' /proc/cpuinfo | wc -l", (out) => {
+                document.getElementById('stat-cpu').textContent = out.trim() || '8';
+                document.getElementById('device-badge').textContent = 'KSU Connected';
+            });
         }
 
-        function runCommand(cmd, label) {
-            logToConsole(`Executing: ${label} (${cmd})...`);
-            
-            if (window.ksu && typeof window.ksu.exec === 'function') {
-                window.ksu.exec(`sh /data/adb/modules/riskr/system/bin/risk ${cmd.replace('risk ', '')}`, {
-                    onStdout: (data) => {
-                        if (data) logToConsole(data.trim());
-                    },
-                    onStderr: (err) => {
-                        if (err) logToConsole(err.trim(), true);
-                    },
-                    onExit: (code) => {
-                        logToConsole(`Command finished with exit code ${code}.`);
-                    }
-                });
-            } else {
-                // Simulation mode
-                setTimeout(() => {
-                    logToConsole(`[SIMULATION] ${label} executed successfully!`);
-                }, 800);
-            }
+        function runRisk(action) {
+            log(`\n> Running: ${action}...`);
+            executeShell(`sh /data/adb/modules/riskr/system/bin/risk ${action}`, (out) => {
+                log(out.trim());
+            });
         }
 
         function applyDownscale() {
-            const pkg = document.getElementById('downscale-pkg').value.trim();
-            const factor = document.getElementById('downscale-factor').value;
+            const pkg = document.getElementById('pkg-input').value.trim();
+            const scale = document.getElementById('scale-select').value;
             if (!pkg) {
-                alert('Please enter a valid package name.');
+                alert('Please enter a package name first.');
                 return;
             }
-            runCommand(`risk downscale ${pkg} ${factor}`, `Game Downscale (${pkg} @ ${factor})`);
+            log(`\n> Applying Downscale to ${pkg} (${scale})...`);
+            executeShell(`sh /data/adb/modules/riskr/system/bin/risk downscale ${pkg} ${scale}`, (out) => {
+                log(out.trim());
+            });
         }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDeviceInfo();
+        });
     </script>
 </body>
 </html>
